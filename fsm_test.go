@@ -117,8 +117,13 @@ func TestOnwardTransitionToExistingState(t *testing.T) {
 func TestInvalidInitialTransition(t *testing.T) {
 	box := NewBox()
 
-	if err := box.machine.ReconcileForState(ClosedState, nil); err == nil {
-		t.Error("was expecting an error here, but received none")
+	err := box.machine.ReconcileForState(ClosedState, nil)
+	if err == nil {
+		t.Error("was expecting an error, but received none")
+	}
+
+	if err != ErrNilToNonInitialTransition {
+		t.Error("unexpected error")
 	}
 }
 
@@ -126,14 +131,34 @@ func TestInvalidOnwardTransition(t *testing.T) {
 	box := NewBox()
 	box.machine.ReconcileForState(OpenState, nil)
 
-	if err := box.machine.ReconcileForState(StoredState, nil); err == nil {
-		t.Error("was expecting an error here, but received none")
+	err := box.machine.ReconcileForState(StoredState, nil)
+	if err == nil {
+		t.Error("was expecting an error, but received none")
+	}
+
+	if err != ErrUndefinedTransition {
+		t.Error("unexpected error")
 	}
 }
 
 func TestInvalidTransitionToNilState(t *testing.T) {
 	box := NewBox()
-	if err := box.machine.ReconcileForState("Bollocks", nil); err == nil {
-		t.Error("was expecting an error here, but received none")
+
+	err := box.machine.ReconcileForState("Bollocks", nil)
+	if err == nil {
+		t.Error("was expecting an error, but received none")
 	}
+
+	if err != ErrUndefinedTransition {
+		t.Error("unexpected error")
+	}
+}
+
+func TestGenericError(t *testing.T) {
+	err := &GenericError{
+		code:    "test code",
+		message: "test message",
+	}
+
+	fmt.Println(err)
 }

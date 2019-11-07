@@ -1,7 +1,5 @@
 package fsm
 
-import "errors"
-
 // Machine ...
 type Machine struct {
 	currentState *State
@@ -20,13 +18,13 @@ func (machine *Machine) ReconcileForState(nextStateName string, args interface{}
 
 	// disallow transition to nil state
 	if nextState == nil {
-		return errors.New("invalid transition: can't undergo an undefined transition")
+		return ErrUndefinedTransition
 	}
 
 	switch machine.currentState {
 	case nil:
 		if nextState.InitialState == false {
-			return errors.New("invalid transition: can't transition from nil state to non-initial state")
+			return ErrNilToNonInitialTransition
 		}
 	default:
 		if machine.currentState.Name == nextStateName {
@@ -34,7 +32,7 @@ func (machine *Machine) ReconcileForState(nextStateName string, args interface{}
 		}
 
 		if machine.currentState.isPossibleTransition(nextState) == false {
-			return errors.New("invalid transition: can't undergo an undefined transition")
+			return ErrUndefinedTransition
 		}
 	}
 
