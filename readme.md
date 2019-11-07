@@ -103,7 +103,7 @@ The state machine is defined inside the `Initialize()` method of the `Order` typ
 ````go
 order.machine = fsm.New(states[initialStateName], states)
 ````
-Note that the `initialStateName` variable passed to the `fsm.New()` function can be empty: `""`. In fact, due to the way this library is designed, if the initial state's transition method is to be executed, it is necessary that `initialStateName` be empty: `""` during the creation of the state machine. The initial state should instead be set by calling `ReconcileForState()` on the state machine once it has been generated. This is covered in the following section.
+Note that the `initialStateName` passed to the `Initialize()` function can be empty: `""`. In fact, due to the way this library is designed, if the initial state's transition method is to be executed, it is necessary that `initialStateName` be empty: `""` during the creation of the state machine. The initial state should instead be set by calling `ReconcileForState()` on the state machine once it has been generated. This is covered in the following section.
 
 ### Transitioning State
 The state machine transitions state via calls to: `ReconcileForState(nextStateName string, args interface{})`
