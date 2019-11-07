@@ -5,7 +5,6 @@ Suppose we wanted to implement the following state machine for an entity called 
 
 <img width="561" alt="Screen Shot 2019-11-07 at 1 32 13 PM" src="https://user-images.githubusercontent.com/1547890/68429491-0bd32b00-0163-11ea-8893-b35a6a7eda10.png">
 
-### Creating a type that embeds a state machine
 We can do so by first creating an Order type that embeds a state machine:
 ````go
 package order
@@ -17,7 +16,8 @@ type  Order  struct {
 	machine *fsm.Machine
 }
 ````
-### Defining the state names
+
+### Defining state names
 Before we define the state machine that models the behaviour of the Order type, it would be handy to have all possible state names defined somewhere as constants:
 ````go
 const (
@@ -27,6 +27,7 @@ const (
 	Delivered =  "DELIVERED"
 )
 ````
+
 ### Defining methods that are called on transition to particular states
 We can also have the machine do stuff on transition to a new state. This can be done by defining methods that can be called when transitioning to particular states. Such methods take the previous state as the first argument, an optional args argument, which is an `interface{}` type, as the second argument, and return an error.
 ````go
@@ -50,6 +51,7 @@ func (order *Order) OnDelivered(previousState *fsm.State, args interface{}) erro
 	return  nil
 }
 ````
+
 ### Defining the state machine
 Finally, once the state names and event methods have been defined we define the state machine like so:
 ````go
@@ -105,6 +107,7 @@ The state machine is defined inside the `Initialize()` method of the `Order` typ
 order.machine = fsm.New(states[initialStateName], states)
 ````
 Note that the `initialStateName` variable passed to the `fsm.New()` function can be empty: `""`. In fact, due to the way this library is designed, if the initial state's transition method is to be executed, it is necessary that `initialStateName` be empty: `""` during the creation of the state machine. The initial state should instead be set by calling `ReconcileForState()` on the state machine once it has been generated. This is covered in the following section.
+
 ### Transitioning State
 The state machine transitions state via calls to: `ReconcileForState(nextStateName string, args interface{})`
 To continue with our `Order`example, new orders can be initialized to the `Shipped` state like so:
@@ -128,8 +131,10 @@ func (order *Order) MarkAsDelivered(signature string) error {
 	return order.machine.ReconcileForState(Delivered, signature)
 }
 ````
+
 ### Transitioning to the Current State
 If `ReconcileForState()` is called where the next state is the current state, it will return immediately, i.e. without calling the method (if one is defined) that would otherwise be called when the the machine transitions to the state in question.
+
 ### Dealing with Invalid Transitions
 If the requested transition is not a defined transition for the current state, `ReconcileForState()` will return the error: `ErrUndefinedTransition`
 
