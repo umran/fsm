@@ -28,8 +28,8 @@ const (
 )
 ````
 
-### Defining methods that are called on transition to particular states
-We can also have the machine do stuff on transition to a new state. This can be done by defining methods that can be called when transitioning to particular states. Such methods take the previous state as the first argument, an optional args argument, which is an `interface{}` type, as the second argument, and return an error.
+### Defining methods that are called when transitioning to particular states
+We can also have the machine do stuff when transitioning to a new state. This can be done by defining methods that are called when transitioning to particular states. Such methods take the previous state as the first argument, an optional args argument, which is an `interface{}` type, as the second argument, and return an error.
 ````go
 // Method to call when transitioning to the SHIPPED state
 func (order *Order) OnShipped(previousState *fsm.State, args interface{}) error {
@@ -53,7 +53,7 @@ func (order *Order) OnDelivered(previousState *fsm.State, args interface{}) erro
 ````
 
 ### Defining the state machine
-Finally, once the state names and event methods have been defined we define the state machine like so:
+Finally, once the state names and event methods have been defined, we define the state machine like so:
 ````go
 func (order *Order)  Initialize(initialStateName string) {
   var states map[string]*fsm.State
