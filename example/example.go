@@ -1,4 +1,4 @@
-package order
+package example
 
 import "github.com/umran/fsm"
 
@@ -50,7 +50,6 @@ func (order *Order) Initialize(initialStateName string) {
 			// An optional method that is called on transition to this state
 			On: order.OnShipped,
 		},
-
 		InDepot: {
 			Name:         InDepot,
 			InitialState: false,
@@ -59,7 +58,6 @@ func (order *Order) Initialize(initialStateName string) {
 			},
 			On: order.OnInDepot,
 		},
-
 		OutForDelivery: {
 			Name:         OutForDelivery,
 			InitialState: false,
@@ -69,7 +67,6 @@ func (order *Order) Initialize(initialStateName string) {
 			},
 			On: order.OnOutForDelivery,
 		},
-
 		Delivered: {
 			Name:         Delivered,
 			InitialState: false,
