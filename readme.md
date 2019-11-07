@@ -15,7 +15,8 @@ B --> C
 C --> B
 C --> D
 ```
-We can do so by creating an Order type that embeds a state machine:
+### Creating a type that embeds a state machine
+We can do so by first creating an Order type that embeds a state machine:
 ````go
 package order
 
