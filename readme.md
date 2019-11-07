@@ -9,10 +9,10 @@ We can do so by first creating an Order type that embeds a state machine:
 ````go
 package order
 
-import  "github.com/umran/fsm"
+import "github.com/umran/fsm"
 
 // Here we define the Order type which embeds the FSM
-type  Order  struct {
+type Order struct {
 	machine *fsm.Machine
 }
 ````
@@ -21,10 +21,10 @@ type  Order  struct {
 Before we define the state machine that models the behaviour of the Order type, it would be handy to have all possible state names defined somewhere as constants:
 ````go
 const (
-	Shipped =  "SHIPPED"
-	InDepot =  "IN_DEPOT"
-	OutForDelivery =  "OUT_FOR_DELIVERY"
-	Delivered =  "DELIVERED"
+	Shipped        = "SHIPPED"
+	InDepot        = "IN_DEPOT"
+	OutForDelivery = "OUT_FOR_DELIVERY"
+	Delivered      = "DELIVERED"
 )
 ````
 
@@ -33,31 +33,31 @@ We can also have the machine do stuff when transitioning to a new state. This ca
 ````go
 // Method to call when transitioning to the SHIPPED state
 func (order *Order) OnShipped(previousState *fsm.State, args interface{}) error {
-	return  nil
+	return nil
 }
 
 // Method to call when transitioning to the IN_DEPOT state
 func (order *Order) OnInDepot(previousState *fsm.State, args interface{}) error {
-	return  nil
+	return nil
 }
 
 // Method to call when transitioning to the OUT_FOR_DELIVERY state
 func (order *Order) OnOutForDelivery(previousState *fsm.State, args interface{}) error {
-	return  nil
+	return nil
 }
 
 // Method to call when transitioning to the DELIVERED state
 func (order *Order) OnDelivered(previousState *fsm.State, args interface{}) error {
-	return  nil
+	return nil
 }
 ````
 
 ### Defining the state machine
 Finally, once the state names and event methods have been defined, we define the state machine like so:
 ````go
-func (order *Order)  Initialize(initialStateName string) {
-  var states map[string]*fsm.State
-  
+func (order *Order) Initialize(initialStateName string) {
+	var states map[string]*fsm.State
+
 	states = map[string]*fsm.State{
 		Shipped: {
 			// The name of the state
@@ -70,35 +70,35 @@ func (order *Order)  Initialize(initialStateName string) {
 			},
 			// An optional method that is called on transition to this state
 			On: order.OnShipped,
-    },
-    
+		},
+
 		InDepot: {
-			Name: InDepot,
+			Name:         InDepot,
 			InitialState: false,
 			Transitions: []func() *fsm.State{
 				func() *fsm.State { return states[OutForDelivery] },
 			},
 			On: order.OnInDepot,
-    },
-    
+		},
+
 		OutForDelivery: {
-			Name: OutForDelivery,
+			Name:         OutForDelivery,
 			InitialState: false,
 			Transitions: []func() *fsm.State{
 				func() *fsm.State { return states[InDepot] },
 				func() *fsm.State { return states[Delivered] },
 			},
 			On: order.OnOutForDelivery,
-    },
-    
+		},
+
 		Delivered: {
-			Name: Delivered,
+			Name:         Delivered,
 			InitialState: false,
-			Transitions: []func() *fsm.State{},
-			On: order.OnDelivered,
+			Transitions:  []func() *fsm.State{},
+			On:           order.OnDelivered,
 		},
 	}
-	
+
 	order.machine = fsm.New(states[initialStateName], states)
 }
 ````
