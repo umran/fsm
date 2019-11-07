@@ -1,4 +1,4 @@
-# FSM: A Simple Library to Generate Finite State Machines in Go
+# FSM: A library with a simple API to generate finite state machines in go
 
 ## Usage
 Suppose we wanted to implement the following state machine for an entity called Order:
