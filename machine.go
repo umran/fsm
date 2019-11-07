@@ -18,6 +18,11 @@ func (machine *Machine) ReconcileForState(nextStateName string, args interface{}
 
 	nextState := machine.states[nextStateName]
 
+	// disallow transition to nil state
+	if nextState == nil {
+		return errors.New("invalid transition: can't undergo an undefined transition")
+	}
+
 	switch machine.currentState {
 	case nil:
 		if nextState.InitialState == false {
@@ -28,7 +33,7 @@ func (machine *Machine) ReconcileForState(nextStateName string, args interface{}
 			return nil
 		}
 
-		if machine.currentState.IsPossibleTransition(nextState) == false {
+		if machine.currentState.isPossibleTransition(nextState) == false {
 			return errors.New("invalid transition: can't undergo an undefined transition")
 		}
 	}
