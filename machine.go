@@ -39,7 +39,11 @@ func (machine *Machine) ReconcileForState(nextStateName string, args interface{}
 	previousState := machine.currentState
 	machine.currentState = nextState
 
-	return machine.currentState.On(previousState, args)
+	if machine.currentState.On != nil {
+		return machine.currentState.On(previousState, args)
+	}
+
+	return nil
 }
 
 // New ...

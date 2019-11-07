@@ -26,11 +26,6 @@ func (box *Box) ReconcileOpen(previousState *State, args interface{}) error {
 	return nil
 }
 
-func (box *Box) ReconcileClosed(previousState *State, args interface{}) error {
-	fmt.Printf("Box transitioning to %s from %s", ClosedState, previousState.Name)
-	return nil
-}
-
 func (box *Box) ReconcileStored(previousState *State, args interface{}) error {
 	fmt.Printf("Box transitioning to %s from %s", StoredState, previousState.Name)
 	return nil
@@ -60,7 +55,6 @@ func NewBox() *Box {
 				func() *State { return states[OpenState] },
 				func() *State { return states[StoredState] },
 			},
-			On: box.ReconcileClosed,
 		},
 		StoredState: {
 			Name:         StoredState,
