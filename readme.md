@@ -3,18 +3,8 @@
 ## Usage
 Suppose we wanted to implement the following state machine for an entity called Order:
 
-```mermaid
-graph LR
-A((Shipped))
-B((In Depot))
-C((Out for Delivery))
-D((Delivered))
+<img width="561" alt="Screen Shot 2019-11-07 at 1 32 13 PM" src="https://user-images.githubusercontent.com/1547890/68429491-0bd32b00-0163-11ea-8893-b35a6a7eda10.png">
 
-A --> B
-B --> C
-C --> B
-C --> D
-```
 ### Creating a type that embeds a state machine
 We can do so by first creating an Order type that embeds a state machine:
 ````go
