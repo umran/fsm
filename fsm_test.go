@@ -177,7 +177,7 @@ func TestUndefinedStateReference(t *testing.T) {
 }
 
 func TestGenericError(t *testing.T) {
-	err := &GenericError{
+	err := &genericError{
 		code:    "test code",
 		message: "test message",
 	}
