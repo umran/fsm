@@ -12,6 +12,20 @@ The `StateDefinition` type allows us to define a state, which consists of the fo
 2. `Transitions`: a list of the names of states it is possible to transition to from the state in question
 3. `On`: A function that is called when transitioning to the state in question. It receives the previous state name (a `string`) as the first argument and an arbitrary `interface{}` type as the second argument
 
+````go
+someState := fsm.StateDefinition{
+	InitialState: true,
+	Transitions: []string{
+		"someOtherState1",
+		"someOtherState2",
+	},
+	On: func(previousState string, args interface{}) error {
+		// this is just a placeholder function that doesn't do anything
+		return nil
+	},
+}
+````
+
 Please note that all of the above fields are optional and do not have to be defined for all states.
 For example a particular state might not allow further transitions, in which case its `Transitions` field would be `nil`. Leaving it undefined in such a case would be completely fine. 
 
