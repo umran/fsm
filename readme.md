@@ -17,9 +17,11 @@ type StateDefinition struct {
 }
 ````
 Please note that all of the above fields are optional and do not have to be defined for all states.
-For example a particular state might not allow further transitions, in which case its `Transitions` property would be empty or `nil`.
+For example a particular state might not allow further transitions, in which case its `Transitions` field would be `nil`. Leaving it undefined in such a case would be completely fine. 
 
-It is worth noting that if `InitialState` is not specified, it defaults to false. So if a particular state is not an initial state we can safely leave out the `InitialState` property.
+The same applies for the `On` field. If there is nothing further to be done on transitioning to a particular state, its `On` field maybe be ignored.
+
+It is worth noting that if `InitialState` is not specified, it defaults to false. So if a particular state is not an initial state we can safely leave out its `InitialState` property.
 
 ### Machines
 #### New(): Generating a new machine
