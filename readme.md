@@ -1,7 +1,7 @@
 # FSM: A library with a simple API to generate finite state machines in go
+[![Documentation](https://godoc.org/github.com/umran/fsm?status.svg)](http://godoc.org/github.com/umran/fsm)
 [![Build Status](https://travis-ci.com/umran/fsm.svg?branch=master)](https://travis-ci.com/umran/fsm)
 [![Coverage Status](https://coveralls.io/repos/github/umran/fsm/badge.svg?branch=master)](https://coveralls.io/github/umran/fsm?branch=master)
-[![Documentation](https://godoc.org/github.com/umran/fsm?status.svg)](http://godoc.org/github.com/umran/fsm)
 [![Go Report Card](https://goreportcard.com/badge/github.com/umran/fsm)](https://goreportcard.com/report/github.com/umran/fsm)
 
 ## API
