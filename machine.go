@@ -1,17 +1,18 @@
 package fsm
 
-// Machine ...
+// Machine contains a collection of states and exists in exactly one of those states at any given time
 type Machine struct {
 	currentState *state
 	states       map[string]*state
 }
 
-// State ...
+// State returns the name of the current state of a given machine
 func (machine *Machine) State() string {
 	return machine.currentState.name
 }
 
-// ReconcileForState ...
+// ReconcileForState transitions the state of a given machine to that specified in the first argument.
+// The second argument is an interface{} type that is passed to the 'On' function assigned to the state.
 func (machine *Machine) ReconcileForState(nextStateName string, args interface{}) error {
 
 	nextState := machine.states[nextStateName]
@@ -51,7 +52,7 @@ func (machine *Machine) ReconcileForState(nextStateName string, args interface{}
 	return nil
 }
 
-// New ...
+// New generates a new state machine according to the initial state and state definitions provided
 func New(initialStateName string, definitions map[string]StateDefinition) (*Machine, error) {
 	states := make(map[string]*state, len(definitions))
 

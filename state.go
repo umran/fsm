@@ -7,7 +7,6 @@ type state struct {
 	on           func(string, interface{}) error
 }
 
-// IsPossibleTransition ...
 func (state *state) isPossibleTransition(nextStateName string) bool {
 	for _, possibleState := range state.transitions {
 		if possibleState == nextStateName {
