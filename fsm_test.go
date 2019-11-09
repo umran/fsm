@@ -144,7 +144,23 @@ func TestInvalidTransitionToNilState(t *testing.T) {
 	}
 }
 
-func TestInvalidMachine(t *testing.T) {
+func TestIllegalStateName(t *testing.T) {
+	_, err := New("", map[string]StateDefinition{
+		"": {
+			Transitions: []string{
+				"OFF",
+			},
+		},
+		"OFF": {},
+	})
+
+	if err != ErrIllegalStateName {
+		t.Error("unexpected error")
+		t.Log(err)
+	}
+}
+
+func TestUndefinedStateReference(t *testing.T) {
 	_, err := New("", map[string]StateDefinition{
 		"ON": {
 			Transitions: []string{
