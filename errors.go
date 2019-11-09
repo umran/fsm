@@ -21,19 +21,19 @@ var (
 
 	// ErrUndefinedState ...
 	ErrUndefinedState error = &genericError{
-		code:    "invalid state",
+		code:    "undefined state",
 		message: "can't reference undefined state",
 	}
 
 	// ErrUndefinedTransition ...
 	ErrUndefinedTransition error = &genericError{
-		code:    "invalid transition",
+		code:    "undefined transition",
 		message: "can't undergo an undefined transition",
 	}
 
 	// ErrNilToNonInitialTransition ...
 	ErrNilToNonInitialTransition error = &genericError{
-		code:    "invalid transition",
+		code:    "nil to non-initial transition",
 		message: "can't transition from nil state to non-initial state",
 	}
 )
