@@ -29,7 +29,7 @@ const (
 ````
 
 ### Defining methods that are called when transitioning to particular states
-We can also have the machine do stuff when transitioning to a new state. This can be done by defining methods to be called when transitioning to particular states. Such methods take the previous state name as the first argument, an optional args argument, which is an `interface{}` type, as the second argument, and return an error.
+We can also have the machine do stuff when transitioning to a new state. This can be done by defining methods to be called when transitioning to particular states. Such methods take as arguments the previous state name, an optional args argument, which is an `interface{}` type, and return an error.
 ````go
 // Method to call when transitioning to the SHIPPED state
 func (order *Order) OnShipped(previousState string, args interface{}) error {
