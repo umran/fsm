@@ -14,6 +14,12 @@ func (ge *GenericError) Error() string {
 }
 
 var (
+	// ErrIllegalStateName ...
+	ErrIllegalStateName error = &GenericError{
+		code:    "illegal state name",
+		message: "can't use reserved name as state name",
+	}
+
 	// ErrUndefinedState ...
 	ErrUndefinedState error = &GenericError{
 		code:    "invalid state",

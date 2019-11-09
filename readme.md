@@ -27,10 +27,13 @@ It is worth noting that if `InitialState` is not specified, it defaults to false
 #### New(): Generating a new machine
 A `Machine` is simply a collection of states and exists in a particular state at any given time. A machine can be in a `nil` state until it is initialized to an initial state. To create a new machine, one must call `New()` with 2 arguments:
 
-1. the first argument is a string that indicates which state the machine should occupy when it is first created. This value can be an empty string: `""`, in which case the machine would occupy a `nil` state when it is first created
+1. the first argument is a `string` that indicates which state the machine should occupy when it is first created. This value can be an empty `string`: `""`, in which case the machine would occupy a `nil` state when it is first created
 2. the second argument is a map from state names to `StateDefinitions` and defines all the possible states the machine can occupy over its lifetime
 
-The `New()` function returns a new machine and an error. The only case where an error is returned is if any of the state definitions defines an undefined state in its list of `Transitions`. In such a case the following error is returned: `ErrUndefinedState`
+The `New()` function returns a new machine and an error. The only cases where an error is returned are:
+
+1. If any of the states is named the empty `string`: `""`, in which case the following error is returned: `ErrIllegalStateName`
+2. if any of the state definitions lists an undefined state under `Transitions`, in which case the following error is returned: `ErrUndefinedState`
 
 ````go
 machine, err := fsm.New("", map[string]fsm.StateDefinition{
@@ -63,8 +66,8 @@ currentStateName := machine.State()
 #### ReconcileForState(): Transitioning the state of the machine
 To transition a machine's state, we call the machine's `ReconcileForState()` method. This method requires two arguments and returns an error:
 
-1. the first argument is a string indicating the name of the state to transition to
-2. the second argument is an `interface{}` and is passed to the state's `On` function (if it is defined)
+1. the first argument is a `string` indicating the name of the state to transition to
+2. the second argument is an `interface{}` type and is passed to the state's `On` function (if it is defined)
 
 ````go
 err := machine.ReconcileforState("STATE_1", nil)
@@ -74,7 +77,7 @@ If `ReconcileForState()` is called with the machine's current state, it will ret
 
 When `ReconcileForState()` is called, it determines if the state transition is allowed. If the transition is not allowed, it will return the following error: `ErrUndefinedTransition`.
 
-Alternately, if the current state of the machine is `nil` and the next state is not defined with the `InitialState` field set to `true`, it will return the following error: `ErrNilToNonInitialTransition`
+Alternately, if the current state of the machine is `nil` and the next state does not have its `InitialState` field set to `true`, the following error will be returned: `ErrNilToNonInitialTransition`
 
 
 

@@ -56,6 +56,11 @@ func New(initialStateName string, definitions map[string]StateDefinition) (*Mach
 	states := make(map[string]*state, len(definitions))
 
 	for name, def := range definitions {
+		// validate the state name
+		if name == "" {
+			return nil, ErrIllegalStateName
+		}
+
 		// validate all transitions for the state def
 		for _, transition := range def.Transitions {
 			_, ok := definitions[transition]
