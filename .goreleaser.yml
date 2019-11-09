@@ -1,6 +1,6 @@
 project_name: fsm
 builds:
-  - main: `.`
+  - main: .
 binary: fsm
 goos:
   - windows
