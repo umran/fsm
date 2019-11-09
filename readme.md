@@ -56,7 +56,7 @@ func (order *Order) OnDelivered(previousState string, args interface{}) error {
 Once the state names and event methods have been defined, we can define the state machine like so:
 ````go
 func (order *Order) Initialize() error {
-	machine, err := fsm.New("", map[string]*fsm.StateDefinition{
+	machine, err := fsm.New("", map[string]fsm.StateDefinition{
 		Shipped: {
 			// Indicates whether the machine can transition from a nil state to this state
 			InitialState: true,

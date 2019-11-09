@@ -35,7 +35,7 @@ func (order *Order) OnDelivered(previousState string, args interface{}) error {
 }
 
 func (order *Order) Initialize(initialStateName string) error {
-	machine, err := fsm.New("", map[string]*fsm.StateDefinition{
+	machine, err := fsm.New("", map[string]fsm.StateDefinition{
 		Shipped: {
 			// Indicates whether the machine can transition from a nil state to this state
 			InitialState: true,

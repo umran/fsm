@@ -52,7 +52,7 @@ func (machine *Machine) ReconcileForState(nextStateName string, args interface{}
 }
 
 // New ...
-func New(initialStateName string, definitions map[string]*StateDefinition) (*Machine, error) {
+func New(initialStateName string, definitions map[string]StateDefinition) (*Machine, error) {
 	states := make(map[string]*state, len(definitions))
 
 	for name, def := range definitions {
@@ -65,7 +65,7 @@ func New(initialStateName string, definitions map[string]*StateDefinition) (*Mac
 		}
 
 		// create and add new state from definition
-		states[name] = newState(name, def)
+		states[name] = newState(name, &def)
 	}
 
 	machine := &Machine{

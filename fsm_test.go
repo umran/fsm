@@ -32,7 +32,7 @@ func (box *Box) ReconcileStored(previousStateName string, args interface{}) erro
 }
 
 func (box *Box) Initialize() error {
-	machine, err := New("", map[string]*StateDefinition{
+	machine, err := New("", map[string]StateDefinition{
 		OpenState: {
 			InitialState: true,
 			Transitions: []string{
@@ -145,7 +145,7 @@ func TestInvalidTransitionToNilState(t *testing.T) {
 }
 
 func TestInvalidMachine(t *testing.T) {
-	_, err := New("", map[string]*StateDefinition{
+	_, err := New("", map[string]StateDefinition{
 		"ON": {
 			Transitions: []string{
 				"SOME_UNDEFINED_STATE",
