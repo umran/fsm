@@ -1,6 +1,7 @@
+project_name: fsm
 builds:
-  - main: app.go
-binary: gomotics
+  - main: `.`
+binary: fsm
 goos:
   - windows
   - darwin
