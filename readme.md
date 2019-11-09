@@ -143,9 +143,9 @@ func (order *Order) OnDelivered(previousState string, args interface{}) error {
 ````
 
 ### Defining the state machine
-Once the state names and event methods have been defined, we may generate the state machine by calling a method on Order, which in this case is `NewStateMachine()`:
+Once the state names and event methods have been defined, we may generate the state machine by calling a method on Order, which in this case is `GenerateStateMachine()`:
 ````go
-func (order *Order) NewStateMachine() error {
+func (order *Order) GenerateStateMachine() error {
 	machine, err := fsm.New("", map[string]fsm.StateDefinition{
 		Shipped: {
 			// Indicates whether the machine can transition from a nil state to this state
@@ -189,7 +189,7 @@ The state machine transitions state via calls to: `ReconcileForState(nextStateNa
 To continue with our `Order`example, new orders can be initialized to the `Shipped` state like so:
 ````go
 order := new(Order)
-order.NewStateMachine()
+order.GenerateStateMachine()
 
 // Note how the initial state is set by calling ReconcileForState
 // This way the OnShipped method is called when the order is
