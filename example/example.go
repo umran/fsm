@@ -69,6 +69,5 @@ func (order *Order) Initialize(initialStateName string) error {
 	}
 
 	order.machine = machine
-
 	return nil
 }

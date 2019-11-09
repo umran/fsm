@@ -90,7 +90,6 @@ func (order *Order) Initialize() error {
 	}
 
 	order.machine = machine
-
 	return nil
 }
 ````
@@ -110,7 +109,7 @@ order.Initialize()
 
 // Note how the initial state is set by calling ReconcileForState
 // This way the OnShipped method is called when the order is
-// initialized in the Shipped state
+// initialized to the Shipped state
 order.machine.ReconcileForState(Shipped, nil)
 ````
 In the real world we would almost always call ReconcileForState within another method that appropriately represents the business logic of our application:
