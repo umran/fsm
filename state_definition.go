@@ -1,6 +1,6 @@
 package fsm
 
-// StateDefinition is used to define states and contain their properties
+// StateDefinition is used to define state properties and behaviour
 type StateDefinition struct {
 	InitialState bool
 	Transitions  []string
