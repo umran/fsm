@@ -2,7 +2,7 @@
 
 ## API
 ### State Definitions
-The `StateDefinition` type allows us to define a state, which constitutes the following properties:
+The `StateDefinition` type allows us to define a state, which consists of the following fields:
 
 1. `InitialState`: indicates whether the machine can transition from a nil state to the state in question
 2. `Transitions`: a list of state transitions that are possible from the state in question
@@ -30,7 +30,7 @@ A `Machine` is simply a collection of states and exists in a particular state at
 1. the first argument is a string that indicates which state the machine should occupy when it is first created. This value can be an empty string: `""`, in which case the machine would occupy a `nil` state when it is first created
 2. the second argument is a map from state names to `StateDefinitions` and defines all the possible states the machine can occupy over its lifetime
 
-The `New()` function returns a new machine and an error. The only case where an error is returned is if any of the state definitions defines an undefined state in its list of `Transitions`. The error is as follows: `ErrUndefinedState`
+The `New()` function returns a new machine and an error. The only case where an error is returned is if any of the state definitions defines an undefined state in its list of `Transitions`. In such a case the following error is returned: `ErrUndefinedState`
 
 ````go
 machine, err := fsm.New("", map[string]fsm.StateDefinition{
