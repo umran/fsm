@@ -8,22 +8,14 @@
 ### State Definitions
 The `StateDefinition` type allows us to define a state, which consists of the following fields:
 
-1. `InitialState`: indicates whether the machine can transition from a nil state to the state in question
-2. `Transitions`: a list of state transitions that are possible from the state in question
+1. `InitialState`: a boolean that indicates whether the machine can transition from a nil state to the state in question
+2. `Transitions`: a list of the names of states it is possible to transition to from the state in question
 3. `On`: A function that is called when transitioning to the state in question. It receives the previous state name (a `string`) as the first argument and an arbitrary `interface{}` type as the second argument
 
-Thus, the `StateDefinition` type is defined as follows:
-````go
-type StateDefinition struct {
-	InitialState bool
-	Transitions []string
-	On func(string, interface{}) error
-}
-````
 Please note that all of the above fields are optional and do not have to be defined for all states.
 For example a particular state might not allow further transitions, in which case its `Transitions` field would be `nil`. Leaving it undefined in such a case would be completely fine. 
 
-The same applies for the `On` field. If there is nothing further to be done on transitioning to a particular state, its `On` field maybe be ignored.
+The same applies to the `On` field. If there is nothing further to be done on transitioning to a particular state, its `On` field maybe be ignored.
 
 It is worth noting that if `InitialState` is not specified, it defaults to false. So if a particular state is not an initial state we may safely leave out its `InitialState` property.
 
