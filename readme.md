@@ -1,7 +1,7 @@
 # FSM: A library with a simple API to generate finite state machines in go
 
-## Usage
-Suppose we wanted to implement the following state machine for an entity called Order:
+## Example
+Suppose we wanted to implement the following state machine for some entity, call it Order:
 
 <img width="561" alt="Screen Shot 2019-11-07 at 1 32 13 PM" src="https://user-images.githubusercontent.com/1547890/68429491-0bd32b00-0163-11ea-8893-b35a6a7eda10.png">
 
@@ -18,7 +18,7 @@ type Order struct {
 ````
 
 ### Defining state names
-Before we define the state machine that models the behaviour of the Order type, it would be handy to have all possible state names defined somewhere as constants:
+Before we define the state machine, it would be handy to have all possible state names defined somewhere as constants:
 ````go
 const (
 	Shipped        = "SHIPPED"
@@ -29,81 +29,76 @@ const (
 ````
 
 ### Defining methods that are called when transitioning to particular states
-We can also have the machine do stuff when transitioning to a new state. This can be done by defining methods that are called when transitioning to particular states. Such methods take the previous state as the first argument, an optional args argument, which is an `interface{}` type, as the second argument, and return an error.
+We can also have the machine do stuff when transitioning to a new state. This can be done by defining methods to be called when transitioning to particular states. Such methods take the previous state name as the first argument, an optional args argument, which is an `interface{}` type, as the second argument, and return an error.
 ````go
 // Method to call when transitioning to the SHIPPED state
-func (order *Order) OnShipped(previousState *fsm.State, args interface{}) error {
+func (order *Order) OnShipped(previousState string, args interface{}) error {
 	return nil
 }
 
 // Method to call when transitioning to the IN_DEPOT state
-func (order *Order) OnInDepot(previousState *fsm.State, args interface{}) error {
+func (order *Order) OnInDepot(previousState string, args interface{}) error {
 	return nil
 }
 
 // Method to call when transitioning to the OUT_FOR_DELIVERY state
-func (order *Order) OnOutForDelivery(previousState *fsm.State, args interface{}) error {
+func (order *Order) OnOutForDelivery(previousState string, args interface{}) error {
 	return nil
 }
 
 // Method to call when transitioning to the DELIVERED state
-func (order *Order) OnDelivered(previousState *fsm.State, args interface{}) error {
+func (order *Order) OnDelivered(previousState string, args interface{}) error {
 	return nil
 }
 ````
 
 ### Defining the state machine
-Finally, once the state names and event methods have been defined, we define the state machine like so:
+Once the state names and event methods have been defined, we can define the state machine like so:
 ````go
-func (order *Order) Initialize(initialStateName string) {
-	var states map[string]*fsm.State
-
-	states = map[string]*fsm.State{
+func (order *Order) Initialize() error {
+	machine, err := fsm.New("", map[string]*fsm.StateDefinition{
 		Shipped: {
-			// The name of the state
-			Name: Shipped,
 			// Indicates whether the machine can transition from a nil state to this state
 			InitialState: true,
 			// A list of possible transitions from this state
-			Transitions: []func() *fsm.State{
-				func() *fsm.State { return states[InDepot] },
+			Transitions: []string{
+				InDepot,
 			},
 			// An optional method that is called on transition to this state
 			On: order.OnShipped,
 		},
 		InDepot: {
-			Name:         InDepot,
-			InitialState: false,
-			Transitions: []func() *fsm.State{
-				func() *fsm.State { return states[OutForDelivery] },
+			Transitions: []string{
+				OutForDelivery,
 			},
 			On: order.OnInDepot,
 		},
 		OutForDelivery: {
-			Name:         OutForDelivery,
-			InitialState: false,
-			Transitions: []func() *fsm.State{
-				func() *fsm.State { return states[InDepot] },
-				func() *fsm.State { return states[Delivered] },
+			Transitions: []string{
+				InDepot,
+				Delivered,
 			},
 			On: order.OnOutForDelivery,
 		},
 		Delivered: {
-			Name:         Delivered,
-			InitialState: false,
-			Transitions:  []func() *fsm.State{},
-			On:           order.OnDelivered,
+			On: order.OnDelivered,
 		},
+	})
+
+	if err != nil {
+		return err
 	}
 
-	order.machine = fsm.New(states[initialStateName], states)
+	order.machine = machine
+
+	return nil
 }
 ````
 The state machine is defined inside the `Initialize()` method of the `Order` type. Inside this method, we create a new state machine initialized to the desired state and assign it to the `order`'s `machine` field:
 ````go
-order.machine = fsm.New(states[initialStateName], states)
+machine, err := fsm.New("", ...)
 ````
-Note that the `initialStateName` passed to the `Initialize()` function can be empty: `""`. In fact, due to the way this library is designed, if the initial state's transition method is to be executed, it is necessary that `initialStateName` be empty: `""` during the creation of the state machine. The initial state should instead be set by calling `ReconcileForState()` on the state machine once it has been generated. This is covered in the following section.
+Note that the `initialStateName` argument passed to `fsm.New()` can be empty: `""`. In fact, due to the way this library is designed, if the initial state's transition method is to be executed, it is necessary that `initialStateName` be empty: `""` during the creation of the state machine. The initial state should instead be set by calling `ReconcileForState()` on the state machine once it has been generated. This is covered in the following section.
 
 ### Transitioning State
 The state machine transitions state via calls to: `ReconcileForState(nextStateName string, args interface{})`
@@ -111,11 +106,11 @@ To continue with our `Order`example, new orders can be initialized to the `Shipp
 ````go
 order := new(Order)
 
-// Note how the initialStateName argument is an empty string
-order.Initialize("")
+order.Initialize()
 
-// This way the OnShipped method is called when
-// calling ReconcileForState on the Shipped state
+// Note how the initial state is set by calling ReconcileForState
+// This way the OnShipped method is called when the order is
+// initialized in the Shipped state
 order.machine.ReconcileForState(Shipped, nil)
 ````
 In the real world we would almost always call ReconcileForState within another method that appropriately represents the business logic of our application:
