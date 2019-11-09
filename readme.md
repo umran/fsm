@@ -92,11 +92,11 @@ Alternately, if the current state of the machine is `nil` and the next state doe
 
 
 ## Example
-Suppose we wanted to implement the following state machine for some entity, call it Order:
+Suppose we wanted to implement the following state machine for some type, call it Order:
 
 <img width="561" alt="Screen Shot 2019-11-07 at 1 32 13 PM" src="https://user-images.githubusercontent.com/1547890/68429491-0bd32b00-0163-11ea-8893-b35a6a7eda10.png">
 
-We can do so by first creating an Order type that embeds a state machine:
+We can do so by defining an Order type that embeds a state machine:
 ````go
 package order
 
@@ -109,7 +109,7 @@ type Order struct {
 ````
 
 ### Defining state names
-Before we define the state machine, it would be handy to have all possible state names defined somewhere as constants:
+Before we generate the state machine, it would be handy to have all possible state names defined somewhere as constants:
 ````go
 const (
 	Shipped        = "SHIPPED"
@@ -143,9 +143,9 @@ func (order *Order) OnDelivered(previousState string, args interface{}) error {
 ````
 
 ### Defining the state machine
-Once the state names and event methods have been defined, we can define the state machine like so:
+Once the state names and event methods have been defined, we may generate the state machine by calling a method on Order, which in this case is `NewStateMachine()`:
 ````go
-func (order *Order) Initialize() error {
+func (order *Order) NewStateMachine() error {
 	machine, err := fsm.New("", map[string]fsm.StateDefinition{
 		Shipped: {
 			// Indicates whether the machine can transition from a nil state to this state
@@ -189,7 +189,7 @@ The state machine transitions state via calls to: `ReconcileForState(nextStateNa
 To continue with our `Order`example, new orders can be initialized to the `Shipped` state like so:
 ````go
 order := new(Order)
-order.Initialize()
+order.NewStateMachine()
 
 // Note how the initial state is set by calling ReconcileForState
 // This way the OnShipped method is called when the order is
