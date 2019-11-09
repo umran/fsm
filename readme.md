@@ -6,7 +6,7 @@ The `StateDefinition` type allows us to define a state, which constitutes the fo
 
 1. `InitialState`: indicates whether the machine can transition from a nil state to the state in question
 2. `Transitions`: a list of state transitions that are possible from the state in question
-3. `On`: A function that is called when transitioning to the state in question
+3. `On`: A function that is called when transitioning to the state in question. It receives the previous state name (a `string`) as the first argument and an arbitrary `interface{}` type as the second argument
 
 Thus, the `StateDefinition` type is defined as follows:
 ````go
