@@ -1,5 +1,81 @@
 # FSM: A library with a simple API to generate finite state machines in go
 
+## API
+### State Definitions
+The `StateDefinition` type allows us to define a state, which constitutes the following properties:
+
+1. `InitialState`: indicates whether the machine can transition from a nil state to the state in question
+2. `Transitions`: a list of state transitions that are possible from the state in question
+3. `On`: A function that is called when transitioning to the state in question
+
+Thus, the `StateDefinition` type is defined as follows:
+````go
+type StateDefinition struct {
+	InitialState bool
+	Transitions []string
+	On func(string, interface{}) error
+}
+````
+Please note that all of the above fields are optional and do not have to be defined for all states.
+For example a particular state might not allow further transitions, in which case its `Transitions` property would be empty or `nil`.
+
+It is worth noting that if `InitialState` is not specified, it defaults to false. So if a particular state is not an initial state we can safely leave out the `InitialState` property.
+
+### Machines
+#### New(): Generating a new machine
+A `Machine` is simply a collection of states and exists in a particular state at any given time. A machine can be in a `nil` state until it is initialized to an initial state. To create a new machine, one must call `New()` with 2 arguments:
+
+1. the first argument is a string that indicates which state the machine should occupy when it is first created. This value can be an empty string: `""`, in which case the machine would occupy a `nil` state when it is first created
+2. the second argument is a map from state names to `StateDefinitions` and defines all the possible states the machine can occupy over its lifetime
+
+The `New()` function returns a new machine and an error. The only case where an error is returned is if any of the state definitions defines an undefined state in its list of `Transitions`. The error is as follows: `ErrUndefinedState`
+
+````go
+machine, err := fsm.New("", map[string]fsm.StateDefinition{
+	"STATE_1": {
+		InitialState: true,
+		Transitions: []string{
+			"STATE_2",
+		},
+		On: func(previousState string, args interface{}) error {
+			// this is just a placeholder function that doesn't do anything
+			return nil
+		},
+	},
+	"STATE_2": {
+		Transitions: []string{
+			"STATE_3",
+		},
+	},
+	"STATE_3": {},
+})
+````
+
+#### State(): Getting the current state of the machine
+We can get the current state of a machine by calling its `State()` method. This method returns a `string` specifying the name of the current state.
+
+````go
+currentStateName := machine.State()
+````
+
+#### ReconcileForState(): Transitioning the state of the machine
+To transition a machine's state, we call the machine's `ReconcileForState()` method. This method requires two arguments and returns an error:
+
+1. the first argument is a string indicating the name of the state to transition to
+2. the second argument is an `interface{}` and is passed to the state's `On` function (if it is defined)
+
+````go
+err := machine.ReconcileforState("STATE_1", nil)
+````
+
+If `ReconcileForState()` is called with the machine's current state, it will return immediately, since the machine is already in the desired state. Please note that in this case the `On` function of the state is not called. For this reason, it is sometimes necessary to provide an empty initial state when generating a new machine in order to make sure that the associated `On` function is called when the machine eventually assumes the desired initial state.
+
+When `ReconcileForState()` is called, it determines if the state transition is allowed. If the transition is not allowed, it will return the following error: `ErrUndefinedTransition`.
+
+Alternately, if the current state of the machine is `nil` and the next state is not defined with the `InitialState` field set to `true`, it will return the following error: `ErrNilToNonInitialTransition`
+
+
+
 ## Example
 Suppose we wanted to implement the following state machine for some entity, call it Order:
 
