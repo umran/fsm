@@ -2,13 +2,13 @@ package fsm
 
 // Machine ...
 type Machine struct {
-	currentState *State
-	states       map[string]*State
+	currentState *state
+	states       map[string]*state
 }
 
 // State ...
-func (machine *Machine) State() *State {
-	return machine.currentState
+func (machine *Machine) State() string {
+	return machine.currentState.name
 }
 
 // ReconcileForState ...
@@ -23,15 +23,15 @@ func (machine *Machine) ReconcileForState(nextStateName string, args interface{}
 
 	switch machine.currentState {
 	case nil:
-		if nextState.InitialState == false {
+		if nextState.initialState == false {
 			return ErrNilToNonInitialTransition
 		}
 	default:
-		if machine.currentState.Name == nextStateName {
+		if machine.currentState.name == nextStateName {
 			return nil
 		}
 
-		if machine.currentState.isPossibleTransition(nextState) == false {
+		if machine.currentState.isPossibleTransition(nextStateName) == false {
 			return ErrUndefinedTransition
 		}
 	}
@@ -39,17 +39,39 @@ func (machine *Machine) ReconcileForState(nextStateName string, args interface{}
 	previousState := machine.currentState
 	machine.currentState = nextState
 
-	if machine.currentState.On != nil {
-		return machine.currentState.On(previousState, args)
+	var previousStateName string
+	if previousState != nil {
+		previousStateName = previousState.name
+	}
+
+	if machine.currentState.on != nil {
+		return machine.currentState.on(previousStateName, args)
 	}
 
 	return nil
 }
 
 // New ...
-func New(initialState *State, states map[string]*State) *Machine {
-	return &Machine{
-		currentState: initialState,
+func New(initialStateName string, definitions map[string]*StateDefinition) (*Machine, error) {
+	states := make(map[string]*state, len(definitions))
+
+	for name, def := range definitions {
+		// validate all transitions for the state def
+		for _, transition := range def.Transitions {
+			_, ok := definitions[transition]
+			if !ok {
+				return nil, ErrUndefinedState
+			}
+		}
+
+		// create and add new state from definition
+		states[name] = newState(name, def)
+	}
+
+	machine := &Machine{
+		currentState: states[initialStateName],
 		states:       states,
 	}
+
+	return machine, nil
 }

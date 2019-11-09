@@ -14,6 +14,12 @@ func (ge *GenericError) Error() string {
 }
 
 var (
+	// ErrUndefinedState ...
+	ErrUndefinedState error = &GenericError{
+		code:    "invalid state",
+		message: "can't reference undefined state",
+	}
+
 	// ErrUndefinedTransition ...
 	ErrUndefinedTransition error = &GenericError{
 		code:    "invalid transition",

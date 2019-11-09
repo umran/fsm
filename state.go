@@ -1,20 +1,28 @@
 package fsm
 
-// State ...
-type State struct {
-	Name         string
-	InitialState bool
-	Transitions  []func() *State
-	On           func(*State, interface{}) error
+type state struct {
+	name         string
+	initialState bool
+	transitions  []string
+	on           func(string, interface{}) error
 }
 
 // IsPossibleTransition ...
-func (state *State) isPossibleTransition(nextState *State) bool {
-	for _, possibleState := range state.Transitions {
-		if possibleState().Name == nextState.Name {
+func (state *state) isPossibleTransition(nextStateName string) bool {
+	for _, possibleState := range state.transitions {
+		if possibleState == nextStateName {
 			return true
 		}
 	}
 
 	return false
+}
+
+func newState(name string, def *StateDefinition) *state {
+	return &state{
+		name:         name,
+		initialState: def.InitialState,
+		transitions:  def.Transitions,
+		on:           def.On,
+	}
 }
