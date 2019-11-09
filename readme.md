@@ -13,7 +13,7 @@ The `StateDefinition` type allows us to define a state, which consists of the fo
 3. `On`: A function that is called when transitioning to the state in question. It receives the previous state name (a `string`) as the first argument and an arbitrary `interface{}` type as the second argument
 
 ````go
-someState := fsm.StateDefinition{
+someStateDefinition := fsm.StateDefinition{
 	InitialState: true,
 	Transitions: []string{
 		"someOtherState1",
