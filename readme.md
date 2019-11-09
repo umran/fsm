@@ -21,7 +21,7 @@ For example a particular state might not allow further transitions, in which cas
 
 The same applies for the `On` field. If there is nothing further to be done on transitioning to a particular state, its `On` field maybe be ignored.
 
-It is worth noting that if `InitialState` is not specified, it defaults to false. So if a particular state is not an initial state we can safely leave out its `InitialState` property.
+It is worth noting that if `InitialState` is not specified, it defaults to false. So if a particular state is not an initial state we may safely leave out its `InitialState` property.
 
 ### Machines
 #### New(): Generating a new machine
