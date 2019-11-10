@@ -98,10 +98,6 @@ Suppose we wanted to implement the following state machine for some type, call i
 
 We can do so by defining an Order type that embeds a state machine:
 ````go
-package order
-
-import "github.com/umran/fsm"
-
 // Here we define the Order type which embeds the FSM
 type Order struct {
 	machine *fsm.Machine
