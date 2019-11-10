@@ -1,19 +1,27 @@
 package fsm
 
+import "sync"
+
 // Machine contains a collection of states and exists in exactly one of those states at any given time
 type Machine struct {
 	currentState *state
 	states       map[string]*state
+	mux          sync.Mutex
 }
 
 // State returns the name of the current state of a given machine
 func (machine *Machine) State() string {
+	machine.mux.Lock()
+	defer machine.mux.Unlock()
+
 	return machine.currentState.name
 }
 
 // ReconcileForState transitions the state of a given machine to that specified in the first argument.
 // The second argument is an interface{} type that is passed to the 'On' function assigned to the state.
 func (machine *Machine) ReconcileForState(nextStateName string, args interface{}) error {
+	machine.mux.Lock()
+	defer machine.mux.Unlock()
 
 	nextState := machine.states[nextStateName]
 
