@@ -14,25 +14,25 @@ func (ge *genericError) Error() string {
 
 var (
 	// ErrIllegalStateName ...
-	ErrIllegalStateName error = &genericError{
+	ErrIllegalStateName = &genericError{
 		code:    "illegal state name",
 		message: "can't use reserved name as state name",
 	}
 
 	// ErrUndefinedState ...
-	ErrUndefinedState error = &genericError{
+	ErrUndefinedState = &genericError{
 		code:    "undefined state",
 		message: "can't reference undefined state",
 	}
 
 	// ErrUndefinedTransition ...
-	ErrUndefinedTransition error = &genericError{
+	ErrUndefinedTransition = &genericError{
 		code:    "undefined transition",
 		message: "can't undergo an undefined transition",
 	}
 
 	// ErrNilToNonInitialTransition ...
-	ErrNilToNonInitialTransition error = &genericError{
+	ErrNilToNonInitialTransition = &genericError{
 		code:    "nil to non-initial transition",
 		message: "can't transition from nil state to non-initial state",
 	}
