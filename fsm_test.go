@@ -1,21 +1,23 @@
 package fsm
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 )
 
 const (
-	OpenState   = "OPEN"
-	ClosedState = "CLOSED"
-	StoredState = "STORED"
+	OpenState    = "OPEN"
+	ClosedState  = "CLOSED"
+	StoredState  = "STORED"
+	FailingState = "FAILING"
 )
 
 type Box struct {
 	machine *Machine
 }
 
-func (box *Box) ReconcileOpen(previousStateName string, args interface{}) error {
+func (box *Box) ReconcileOpen(previousStateName string, args ...interface{}) error {
 	switch previousStateName {
 	case "":
 		fmt.Printf("Box initialized to %s", OpenState)
@@ -26,9 +28,14 @@ func (box *Box) ReconcileOpen(previousStateName string, args interface{}) error 
 	return nil
 }
 
-func (box *Box) ReconcileStored(previousStateName string, args interface{}) error {
+func (box *Box) ReconcileStored(previousStateName string, args ...interface{}) error {
 	fmt.Printf("Box transitioning to %s from %s", StoredState, previousStateName)
 	return nil
+}
+
+func (box *Box) ReconcileFailing(previousStateName string, args ...interface{}) error {
+	fmt.Printf("Box undergoing a failing transition to %s from %s", FailingState, previousStateName)
+	return errors.New("failing")
 }
 
 func (box *Box) Initialize() error {
@@ -52,7 +59,11 @@ func (box *Box) Initialize() error {
 			},
 			On: box.ReconcileStored,
 		},
-	})
+		FailingState: {
+			InitialState: true,
+			On:           box.ReconcileFailing,
+		},
+	}, nil)
 
 	if err != nil {
 		return err
@@ -144,6 +155,55 @@ func TestInvalidTransitionToNilState(t *testing.T) {
 	}
 }
 
+func TestTransitionWithFailingOnTransition(t *testing.T) {
+	box := NewBox()
+	box.Initialize()
+
+	err := box.machine.ReconcileForState(FailingState, nil)
+
+	switch {
+	case err == nil:
+		t.Error("was expecting an error")
+	case err.Error() != "failing":
+		t.Error("unexpected error")
+		t.Log(err)
+	}
+}
+
+func TestMachineWithReconcileUpdate(t *testing.T) {
+	machine, _ := New("", map[string]StateDefinition{
+		"STATE_1": {
+			InitialState: true,
+		},
+	}, func(nextStateName string, args ...interface{}) error {
+		return nil
+	})
+
+	if err := machine.ReconcileForState("STATE_1"); err != nil {
+		t.Error("unexpected error")
+		t.Log(err)
+	}
+}
+
+func TestMachineWithFailingReconcileUpdate(t *testing.T) {
+	machine, _ := New("", map[string]StateDefinition{
+		"STATE_1": {
+			InitialState: true,
+		},
+	}, func(nextStateName string, args ...interface{}) error {
+		return errors.New("failing")
+	})
+
+	err := machine.ReconcileForState("STATE_1")
+	switch {
+	case err == nil:
+		t.Error("was expecting an error")
+	case err.Error() != "failing":
+		t.Error("unexpected error")
+		t.Log(err)
+	}
+}
+
 func TestIllegalStateName(t *testing.T) {
 	_, err := New("", map[string]StateDefinition{
 		"": {
@@ -152,7 +212,7 @@ func TestIllegalStateName(t *testing.T) {
 			},
 		},
 		"OFF": {},
-	})
+	}, nil)
 
 	if err != ErrIllegalStateName {
 		t.Error("unexpected error")
@@ -168,7 +228,7 @@ func TestUndefinedStateReference(t *testing.T) {
 			},
 		},
 		"OFF": {},
-	})
+	}, nil)
 
 	if err != ErrUndefinedState {
 		t.Error("unexpected error")

@@ -4,7 +4,7 @@ type state struct {
 	name         string
 	initialState bool
 	transitions  []string
-	on           func(string, interface{}) error
+	on           func(string, ...interface{}) error
 }
 
 func (state *state) isPossibleTransition(nextStateName string) bool {

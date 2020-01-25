@@ -4,22 +4,20 @@ import "sync"
 
 // Machine contains a collection of states and exists in exactly one of those states at any given time
 type Machine struct {
-	currentState *state
-	states       map[string]*state
-	mux          sync.Mutex
+	currentState    *state
+	states          map[string]*state
+	reconcileUpdate func(string, ...interface{}) error
+	mux             sync.Mutex
 }
 
 // State returns the name of the current state of a given machine
 func (machine *Machine) State() string {
-	machine.mux.Lock()
-	defer machine.mux.Unlock()
-
 	return machine.currentState.name
 }
 
 // ReconcileForState transitions the state of a given machine to that specified in the first argument.
 // The second argument is an interface{} type that is passed to the 'On' function assigned to the state.
-func (machine *Machine) ReconcileForState(nextStateName string, args interface{}) error {
+func (machine *Machine) ReconcileForState(nextStateName string, args ...interface{}) error {
 	machine.mux.Lock()
 	defer machine.mux.Unlock()
 
@@ -47,6 +45,11 @@ func (machine *Machine) ReconcileForState(nextStateName string, args interface{}
 
 	previousState := machine.currentState
 	machine.currentState = nextState
+	if machine.reconcileUpdate != nil {
+		if err := machine.reconcileUpdate(nextStateName, args...); err != nil {
+			return err
+		}
+	}
 
 	var previousStateName string
 	if previousState != nil {
@@ -54,14 +57,16 @@ func (machine *Machine) ReconcileForState(nextStateName string, args interface{}
 	}
 
 	if machine.currentState.on != nil {
-		return machine.currentState.on(previousStateName, args)
+		if err := machine.currentState.on(previousStateName, args...); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
 // New generates a new state machine according to the initial state and state definitions provided
-func New(initialStateName string, definitions map[string]StateDefinition) (*Machine, error) {
+func New(initialStateName string, definitions map[string]StateDefinition, reconcileUpdate func(string, ...interface{}) error) (*Machine, error) {
 	states := make(map[string]*state, len(definitions))
 
 	for name, def := range definitions {
@@ -83,8 +88,9 @@ func New(initialStateName string, definitions map[string]StateDefinition) (*Mach
 	}
 
 	machine := &Machine{
-		currentState: states[initialStateName],
-		states:       states,
+		currentState:    states[initialStateName],
+		states:          states,
+		reconcileUpdate: reconcileUpdate,
 	}
 
 	return machine, nil

@@ -10,7 +10,7 @@ The `StateDefinition` type allows us to define a state, which consists of the fo
 
 1. `InitialState`: a boolean that indicates whether the machine can transition from a nil state to the state in question
 2. `Transitions`: a list of the names of states it is possible to transition to from the state in question
-3. `On`: A function that is called when transitioning to the state in question. It receives the previous state name (a `string`) as the first argument and an arbitrary `interface{}` type as the second argument
+3. `On`: A function that is called when transitioning to the state in question. The signature of this function is as follows: `func(nextStateName string, args ...interface{}) error`. It receives the previous state name (a `string`) as the first argument, an arbitrary list of type `interface{}` as the second argument and returns an error
 
 ````go
 someStateDefinition := fsm.StateDefinition{
@@ -35,10 +35,11 @@ It is worth noting that if `InitialState` is not specified, it defaults to false
 
 ### Machines
 #### New(): Generating a new machine
-A `Machine` is simply a collection of states and exists in a particular state at any given time. A machine can be in a `nil` state until it is initialized to an initial state. To create a new machine, one must call `New()` with 2 arguments:
+A `Machine` is simply a collection of states and exists in a particular state at any given time. A machine can be in a `nil` state until it is initialized to an initial state. To create a new machine, one must call `New()` with 2 arguments and 1 optional argument:
 
 1. the first argument is a `string` that indicates which state the machine should occupy when it is first created. This value can be an empty `string`: `""`, in which case the machine would occupy a `nil` state when it is first created
 2. the second argument is a map from state names to `StateDefinitions` and defines all the possible states the machine can occupy over its lifetime
+3. the third argument is an optional function, internally called `reconcileUpdate`, that is called on updating the state of the machine. This is useful when the update in state needs to be reconciled with an underlying store or database. The signature of this function is as follows: `func(nextStateName string, args ...interface{}) error`. It receives the previous state name (a `string`) as the first argument, an arbitrary list of type `interface{}` as the second argument and returns an error
 
 The `New()` function returns a new machine and an error. The only cases where an error is returned are:
 
@@ -63,6 +64,8 @@ machine, err := fsm.New("", map[string]fsm.StateDefinition{
 		},
 	},
 	"STATE_3": {},
+}, func(nextStateName string, args ...interface{}) error {
+	return nil
 })
 ````
 
@@ -77,13 +80,13 @@ currentStateName := machine.State()
 To transition a machine's state, we call the machine's `ReconcileForState()` method. This method requires two arguments and returns an error:
 
 1. the first argument is a `string` indicating the name of the state to transition to
-2. the second argument is an `interface{}` type and is passed to the state's `On` function (if it is defined)
+2. the second argument is list of type `interface{}` and is passed to both the machine's `reconcileState` function (if it is defined) and the state's `On` function (if it is defined)
 
 ````go
 err := machine.ReconcileforState("STATE_1", nil)
 ````
 
-If `ReconcileForState()` is called with the machine's current state, it will return immediately, since the machine is already in the desired state. Please note that in this case the `On` function of the state is not called. For this reason, it is sometimes necessary to provide an empty initial state when generating a new machine in order to make sure that the associated `On` function is called when the machine eventually assumes the desired initial state.
+If `ReconcileForState()` is called with the machine's current state, it will return immediately, since the machine is already in the desired state. Please note that in this case neither the machine's `reconcileUpdate` function, nor the state's `On` function is called. For this reason, it is sometimes necessary to provide an empty initial state when generating a new machine in order to make sure that the associated `On` function is called when the machine eventually assumes the desired initial state.
 
 When `ReconcileForState()` is called, it determines if the state transition is allowed. If the transition is not allowed, it will return the following error: `ErrUndefinedTransition`.
 
@@ -115,34 +118,34 @@ const (
 )
 ````
 
-### Defining "On" methods
+### Defining "On" functions
 ````go
-// Method to call when transitioning to the SHIPPED state
+// Function to call when transitioning to the SHIPPED state
 func (order *Order) OnShipped(previousState string, args interface{}) error {
 	return nil
 }
 
-// Method to call when transitioning to the IN_DEPOT state
+// Function to call when transitioning to the IN_DEPOT state
 func (order *Order) OnInDepot(previousState string, args interface{}) error {
 	return nil
 }
 
-// Method to call when transitioning to the OUT_FOR_DELIVERY state
+// Function to call when transitioning to the OUT_FOR_DELIVERY state
 func (order *Order) OnOutForDelivery(previousState string, args interface{}) error {
 	return nil
 }
 
-// Method to call when transitioning to the DELIVERED state
+// Function to call when transitioning to the DELIVERED state
 func (order *Order) OnDelivered(previousState string, args interface{}) error {
 	return nil
 }
 ````
 
 ### Defining the state machine
-Once the state names and event methods have been defined, we may generate the state machine by calling a method on Order, which in this case is `GenerateStateMachine()`:
+Once the state names and on functions have been defined, we may generate the state machine by calling a method on Order, which in this case is `InitializeStateMachine()`:
 ````go
-func (order *Order) GenerateStateMachine() error {
-	machine, err := fsm.New("", map[string]fsm.StateDefinition{
+func (order *Order) InitializeStateMachine() error {
+	order.machine, err := fsm.New("", map[string]fsm.StateDefinition{
 		Shipped: {
 			// Indicates whether the machine can transition from a nil state to this state
 			InitialState: true,
@@ -150,7 +153,7 @@ func (order *Order) GenerateStateMachine() error {
 			Transitions: []string{
 				InDepot,
 			},
-			// An optional method that is called on transition to this state
+			// An optional function that is called on transition to this state
 			On: order.OnShipped,
 		},
 		InDepot: {
@@ -171,21 +174,16 @@ func (order *Order) GenerateStateMachine() error {
 		},
 	})
 
-	if err != nil {
-		return err
-	}
-
-	order.machine = machine
-	return nil
+	return err
 }
 ````
 
 ### Transitioning State
-The state machine transitions state via calls to: `ReconcileForState(nextStateName string, args interface{})`
+The state machine transitions state via calls to: `ReconcileForState(nextStateName string, args ...interface{})`
 To continue with our `Order`example, new orders can be initialized to the `Shipped` state like so:
 ````go
 order := new(Order)
-order.GenerateStateMachine()
+order.InitializeStateMachine()
 
 // Note how the initial state is set by calling ReconcileForState
 // This way the OnShipped method is called when the order is

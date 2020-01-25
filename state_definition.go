@@ -4,5 +4,5 @@ package fsm
 type StateDefinition struct {
 	InitialState bool
 	Transitions  []string
-	On           func(string, interface{}) error
+	On           func(string, ...interface{}) error
 }
