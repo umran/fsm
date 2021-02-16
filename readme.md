@@ -83,7 +83,7 @@ To transition a machine's state, we call the machine's `ReconcileForState()` met
 2. the second argument is list of type `interface{}` and is passed to both the machine's `reconcileState` function (if it is defined) and the state's `On` function (if it is defined)
 
 ````go
-err := machine.ReconcileforState("STATE_1", nil)
+err := machine.ReconcileForState("STATE_1", nil)
 ````
 
 If `ReconcileForState()` is called with the machine's current state, it will return immediately, since the machine is already in the desired state. Please note that in this case neither the machine's `reconcileUpdate` function, nor the state's `On` function is called. For this reason, it is sometimes necessary to provide an empty initial state when generating a new machine in order to make sure that the associated `On` function is called when the machine eventually assumes the desired initial state.
